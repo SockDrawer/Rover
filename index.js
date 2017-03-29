@@ -10,7 +10,7 @@ module.exports = {
 var express = require('express')
 var app = express()
 
-app.get('/updated', function (req, res, next) {
+app.post('/updated', function (req, res, next) {
     return module.exports
     .handle()
     .then(() => res.sendStatus(200))
