@@ -10,7 +10,7 @@ module.exports = {
         const zen = body.zen;
         const ssh = module.exports.ssh;
         const timestamp = dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss');
-        const line = `[${timestamp}] ${zen}`;
+        const line = `[${timestamp}] ${zen} \n`;
         
         return fs.appendFile('/home/rover/hooksreceived.log', line)
             .catch((err) => console.error(err))
