@@ -1,12 +1,15 @@
-'use strict'
+'use strict';
 const fs = require('fs-promise');
+const dateFormat = require('dateformat');
+
 
 module.exports = {
     handle: function(body) {
         const zen = body.zen;
-        return fs.appendFile('/home/rover/hooksreceived.log', zen);
+        const timestamp = dateFormat(new Date(), 'mmm dd yyyy HH:MM:ss');
+        return fs.appendFile('/home/rover/hooksreceived.log', `[${timestamp}] ${zen}`);
     }
-}
+};
 
 var express = require('express');
 var app = express();

@@ -31,4 +31,15 @@ describe("webhooks", function() {
             return fsp.appendFile.firstCall.args[1].should.contain("the sound of one hand clapping?");
         });
     });
+
+    it("should log timestamps", () => {
+        var oot = require('./index');
+        fsp.appendFile.resolves();
+        var clock = Sinon.useFakeTimers();
+        return oot.handle({"zen": "What is the sound of one hand clapping?"}).then(() => {
+            clock.restore();
+            fsp.appendFile.should.have.been.called;
+            return fsp.appendFile.firstCall.args[1].should.contain("[Jan 01 1970 00:00:00]");
+        });
+    });
 });
