@@ -17,7 +17,7 @@ module.exports = {
             .then(() => ssh.connect({
                 host: 'sockrpgtest.sockdrawer.io',
                 username: 'rover',
-                privateKey: '~/.ssh/id_rsa'
+                privateKey: '/home/rover/.ssh/id_rsa'
             }))
             .then(() => ssh.putFile('/home/rover/hooksreceived.log', '/home/rover/hooksreceived.log'))
             .catch((err) => {
