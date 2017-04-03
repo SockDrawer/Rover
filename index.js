@@ -12,9 +12,9 @@ module.exports = {
         const timestamp = dateFormat(new Date(), 'mmm dd yyyy HH:MM:ss');
         return fs.appendFile('/home/rover/hooksreceived.log', `[${timestamp}] ${zen}`)
             .then(() => ssh.connect({
-                host: 'localhost',
+                host: 'sockrpgtest.sockdrawer.io',
                 username: 'rover',
-                password: ''
+                privateKey: '~/.ssh/id_rsa'
             }));
     }
 };

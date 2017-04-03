@@ -43,7 +43,11 @@ describe("webhooks", function() {
     
     it("should ssh into the staging server", () => {
         return oot.handle({"zen": "What is the sound of one hand clapping?"}).then(() => {
-            return oot.ssh.connect.should.have.been.called;
+            return oot.ssh.connect.should.have.been.calledWith({
+                host: 'sockrpgtest.sockdrawer.io',
+                username: 'rover',
+                privateKey: '~/.ssh/id_rsa'
+            });
         });
     });
 });
