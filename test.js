@@ -43,6 +43,16 @@ describe("webhooks", function() {
         });
     });
     
+    it("should handle log errors", () => {
+       Sinon.stub(console, "error");
+       const err = new Error("I AM ERROR");
+       fsp.appendFile.rejects(err);
+       return oot.handle({"zen": "stuff"}).then(() => {
+           console.error.should.have.been.calledWith(err);
+           console.error.restore();
+       });
+    });
+    
     it("should ssh into the staging server", () => {
         return oot.handle({"zen": "What is the sound of one hand clapping?"}).then(() => {
             return oot.ssh.connect.should.have.been.calledWith({
@@ -57,5 +67,14 @@ describe("webhooks", function() {
         return oot.handle({"zen": "What is the sound of one hand clapping?"}).then(() => {
             return oot.ssh.putFile.should.have.been.calledWith('/home/rover/hooksreceived.log', '/home/rover/hooksreceived.log');
         });
+    });
+    
+    it("should handle ssh errors on connect", () => {
+       const err = new Error("I AM ERROR");
+       oot.ssh.connect.rejects(err);
+       return oot.handle({"zen": "stuff"}).then(() => {
+           fsp.appendFile.should.have.been.calledTwice;
+           fsp.appendFile.secondCall.args[1].should.include('I AM ERROR');
+       });
     });
 });

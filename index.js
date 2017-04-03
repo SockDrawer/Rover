@@ -13,12 +13,16 @@ module.exports = {
         const line = `[${timestamp}] ${zen}`;
         
         return fs.appendFile('/home/rover/hooksreceived.log', line)
+            .catch((err) => console.error(err))
             .then(() => ssh.connect({
                 host: 'sockrpgtest.sockdrawer.io',
                 username: 'rover',
                 privateKey: '~/.ssh/id_rsa'
             }))
-            .then(() => ssh.putFile('/home/rover/hooksreceived.log', '/home/rover/hooksreceived.log'));
+            .then(() => ssh.putFile('/home/rover/hooksreceived.log', '/home/rover/hooksreceived.log'))
+            .catch((err) => {
+                return fs.appendFile('/home/rover/hooksreceived.log', `[${timestamp}] ERROR: ${err.toString()}`);
+            });
     }
 };
 
