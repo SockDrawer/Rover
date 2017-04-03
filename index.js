@@ -2,10 +2,21 @@
 const fs = require('fs-promise');
 const dateFormat = require('dateformat');
 const node_ssh = require('node-ssh');
+const pm2 = require('pm2');
+
 
 
 module.exports = {
     ssh: new node_ssh(),
+    pm2_connect: function() {
+      let promise = new Promise((resolve, reject) => {
+        pm2.connect(function(err) {
+            if (err) return reject(err);
+            return resolve(pm2);
+        });
+      });
+      return promise;
+    },
     handle: function(body) {
         const zen = body.zen;
         const ssh = module.exports.ssh;
@@ -20,6 +31,7 @@ module.exports = {
                 privateKey: '/home/rover/.ssh/id_rsa'
             }))
             .then(() => ssh.putFile('/home/rover/hooksreceived.log', '/home/rover/hooksreceived.log'))
+            .then(() => module.exports.pm2_connect())
             .catch((err) => {
                 return fs.appendFile('/home/rover/hooksreceived.log', `[${timestamp}] ERROR: ${err.toString()} \n`);
             });
