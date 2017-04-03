@@ -5,17 +5,19 @@ Chai.should();
 Chai.use(require('sinon-chai'));
 
 describe("webhooks", function() {
+    var oot = require('./index');
+
     beforeEach(() => {
-        Sinon.stub(fsp, "appendFile");
+        Sinon.stub(fsp, "appendFile").resolves();
+        Sinon.stub(oot.ssh, "connect").resolves();
     });
     
     afterEach(() => {
         fsp.appendFile.restore();
+        oot.ssh.connect.restore();
     });
     
     it("should listen for requests and write to a file", () => {
-        var oot = require('./index');
-        fsp.appendFile.resolves();
         return oot.handle({"json": "here"}).then(() => {
             //check for file write here
             return fsp.appendFile.should.have.been.called;
@@ -23,8 +25,6 @@ describe("webhooks", function() {
     });
 
     it("should log the zen", () => {
-        var oot = require('./index');
-        fsp.appendFile.resolves();
         return oot.handle({"zen": "What is the sound of one hand clapping?"}).then(() => {
             //check for file write here
             fsp.appendFile.should.have.been.called;
@@ -33,13 +33,17 @@ describe("webhooks", function() {
     });
 
     it("should log timestamps", () => {
-        var oot = require('./index');
-        fsp.appendFile.resolves();
         var clock = Sinon.useFakeTimers();
         return oot.handle({"zen": "What is the sound of one hand clapping?"}).then(() => {
             clock.restore();
             fsp.appendFile.should.have.been.called;
             return fsp.appendFile.firstCall.args[1].should.contain("[Jan 01 1970 00:00:00]");
+        });
+    });
+    
+    it("should ssh into the staging server", () => {
+        return oot.handle({"zen": "What is the sound of one hand clapping?"}).then(() => {
+            return oot.ssh.connect.should.have.been.called;
         });
     });
 });
