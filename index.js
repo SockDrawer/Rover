@@ -21,7 +21,7 @@ module.exports = {
             }))
             .then(() => ssh.putFile('/home/rover/hooksreceived.log', '/home/rover/hooksreceived.log'))
             .catch((err) => {
-                return fs.appendFile('/home/rover/hooksreceived.log', `[${timestamp}] ERROR: ${err.toString()}`);
+                return fs.appendFile('/home/rover/hooksreceived.log', `[${timestamp}] ERROR: ${err.toString()} \n`);
             });
     }
 };
