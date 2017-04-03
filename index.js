@@ -9,7 +9,7 @@ module.exports = {
     handle: function(body) {
         const zen = body.zen;
         const ssh = module.exports.ssh;
-        const timestamp = dateFormat(new Date(), 'mmm dd yyyy HH:MM:ss');
+        const timestamp = dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss');
         const line = `[${timestamp}] ${zen}`;
         
         return fs.appendFile('/home/rover/hooksreceived.log', line)
