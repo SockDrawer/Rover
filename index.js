@@ -10,12 +10,15 @@ module.exports = {
         const zen = body.zen;
         const ssh = module.exports.ssh;
         const timestamp = dateFormat(new Date(), 'mmm dd yyyy HH:MM:ss');
-        return fs.appendFile('/home/rover/hooksreceived.log', `[${timestamp}] ${zen}`)
+        const line = `[${timestamp}] ${zen}`;
+        
+        return fs.appendFile('/home/rover/hooksreceived.log', line)
             .then(() => ssh.connect({
                 host: 'sockrpgtest.sockdrawer.io',
                 username: 'rover',
                 privateKey: '~/.ssh/id_rsa'
-            }));
+            }))
+            .then(() => ssh.putFile('/home/rover/hooksreceived.log', '/home/rover/hooksreceived.log'));
     }
 };
 

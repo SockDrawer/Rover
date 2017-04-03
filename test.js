@@ -10,11 +10,13 @@ describe("webhooks", function() {
     beforeEach(() => {
         Sinon.stub(fsp, "appendFile").resolves();
         Sinon.stub(oot.ssh, "connect").resolves();
+        Sinon.stub(oot.ssh, "putFile").resolves();
     });
     
     afterEach(() => {
         fsp.appendFile.restore();
         oot.ssh.connect.restore();
+        oot.ssh.putFile.restore();
     });
     
     it("should listen for requests and write to a file", () => {
@@ -48,6 +50,12 @@ describe("webhooks", function() {
                 username: 'rover',
                 privateKey: '~/.ssh/id_rsa'
             });
+        });
+    });
+
+    it("should copy its log to the remote server", () => {
+        return oot.handle({"zen": "What is the sound of one hand clapping?"}).then(() => {
+            return oot.ssh.putFile.should.have.been.calledWith('/home/rover/hooksreceived.log', '/home/rover/hooksreceived.log');
         });
     });
 });
