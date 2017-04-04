@@ -4,6 +4,11 @@ const dateFormat = require('dateformat');
 const node_ssh = require('node-ssh');
 const pm2 = require('pm2');
 
+function log(msg) {
+    const timestamp = dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss');
+    const line = `[${timestamp}] ${msg} \n`;
+    return fs.appendFile('/home/rover/hooksreceived.log', line);
+}
 
 
 module.exports = {
@@ -29,21 +34,21 @@ module.exports = {
     handle: function(body) {
         const zen = body.zen;
         const ssh = module.exports.ssh;
-        const timestamp = dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss');
-        const line = `[${timestamp}] ${zen} \n`;
         
-        return fs.appendFile('/home/rover/hooksreceived.log', line)
+        return log(zen)
             .catch((err) => console.error(err))
             .then(() => ssh.connect({
                 host: 'sockrpgtest.sockdrawer.io',
                 username: 'rover',
                 privateKey: '/home/rover/.ssh/id_rsa'
             }))
-            .then(() => ssh.putFile('/home/rover/hooksreceived.log', '/home/rover/hooksreceived.log'))
             .then(() => module.exports.pm2_connect())
             .then(() => module.exports.pm2_restart('zoidberg'))
+            .then(() => log('Restarted Zoidberg'))
+            .then(() => pm2.disconnect())
+            .then(() => ssh.putFile('/home/rover/hooksreceived.log', '/home/rover/hooksreceived.log'))
             .catch((err) => {
-                return fs.appendFile('/home/rover/hooksreceived.log', `[${timestamp}] ERROR: ${err.toString()} \n`);
+                return log(`ERROR: ${err.toString()}`);
             });
     }
 };

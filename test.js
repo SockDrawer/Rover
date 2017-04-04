@@ -14,6 +14,7 @@ describe("webhooks", function() {
         Sinon.stub(oot.ssh, "putFile").resolves();
         Sinon.stub(pm2, "connect").yields();
         Sinon.stub(pm2, "restart").yields();
+        Sinon.stub(pm2, "disconnect");
     });
     
     afterEach(() => {
@@ -22,6 +23,7 @@ describe("webhooks", function() {
         oot.ssh.putFile.restore();
         pm2.connect.restore();
         pm2.restart.restore();
+        pm2.disconnect.restore();
     });
     
     it("should listen for requests and write to a file", () => {
@@ -54,7 +56,7 @@ describe("webhooks", function() {
        fsp.appendFile.rejects(err);
        return oot.handle({"zen": "stuff"}).then(() => {
            console.error.should.have.been.calledWith(err);
-           console.error.restore();
+           return console.error.restore();
        });
     });
     
@@ -75,11 +77,11 @@ describe("webhooks", function() {
     });
     
     it("should handle ssh errors on connect", () => {
-       const err = new Error("I AM ERROR");
+       const err = new Error("I AM ANOTHER ERROR");
        oot.ssh.connect.rejects(err);
        return oot.handle({"zen": "stuff"}).then(() => {
            fsp.appendFile.should.have.been.calledTwice;
-           fsp.appendFile.secondCall.args[1].should.include('I AM ERROR');
+           fsp.appendFile.secondCall.args[1].should.include('I AM ANOTHER ERROR');
        });
     });
     
@@ -93,5 +95,18 @@ describe("webhooks", function() {
         return oot.handle({"zen": "stuff"}).then(() => {
             pm2.restart.should.have.been.calledWith('zoidberg');
        });
+    });
+    
+    it("should disconnect from pm2", () => {
+        return oot.handle({"zen": "stuff"}).then(() => {
+            pm2.disconnect.should.have.been.called;
+       });
+    }); 
+    
+    it("should log the restart", () => {
+        return oot.handle({"zen": "What is the sound of one hand clapping?"}).then(() => {
+            fsp.appendFile.should.have.been.calledTwice;
+            return fsp.appendFile.secondCall.args[1].should.contain("Restarted Zoidberg");
+        });
     });
 });
