@@ -10,6 +10,13 @@ function log(msg) {
     return fs.appendFile('/home/rover/hooksreceived.log', line);
 }
 
+function restartBot(name) {
+    return module.exports.pm2_restart(name)
+            .then(() => log(`Restarted ${name}`));
+}
+
+const botList = ['sockbot', 'zoidberg'];
+
 
 module.exports = {
     ssh: new node_ssh(),
@@ -43,8 +50,7 @@ module.exports = {
                 privateKey: '/home/rover/.ssh/id_rsa'
             }))
             .then(() => module.exports.pm2_connect())
-            .then(() => module.exports.pm2_restart('zoidberg'))
-            .then(() => log('Restarted Zoidberg'))
+            .then(() => Promise.all(botList.map(restartBot)))
             .then(() => pm2.disconnect())
             .then(() => ssh.putFile('/home/rover/hooksreceived.log', '/home/rover/hooksreceived.log'))
             .catch((err) => {

@@ -53,7 +53,7 @@ describe("webhooks", function() {
     it("should handle log errors", () => {
        Sinon.stub(console, "error");
        const err = new Error("I AM ERROR");
-       fsp.appendFile.rejects(err);
+       fsp.appendFile.onFirstCall().rejects(err);
        return oot.handle({"zen": "stuff"}).then(() => {
            console.error.should.have.been.calledWith(err);
            return console.error.restore();
@@ -97,6 +97,12 @@ describe("webhooks", function() {
        });
     });
     
+    it("should restart sockbot", () => {
+        return oot.handle({"zen": "stuff"}).then(() => {
+            pm2.restart.should.have.been.calledWith('sockbot');
+       });
+    });
+    
     it("should disconnect from pm2", () => {
         return oot.handle({"zen": "stuff"}).then(() => {
             pm2.disconnect.should.have.been.called;
@@ -105,8 +111,7 @@ describe("webhooks", function() {
     
     it("should log the restart", () => {
         return oot.handle({"zen": "What is the sound of one hand clapping?"}).then(() => {
-            fsp.appendFile.should.have.been.calledTwice;
-            return fsp.appendFile.secondCall.args[1].should.contain("Restarted Zoidberg");
+            return fsp.appendFile.should.have.been.calledWith(Sinon.match('hooksreceived'), Sinon.match("Restarted zoidberg"));
         });
     });
 });
