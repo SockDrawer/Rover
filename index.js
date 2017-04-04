@@ -17,6 +17,15 @@ module.exports = {
       });
       return promise;
     },
+    pm2_restart: function(process) {
+        let promise = new Promise((resolve, reject) => {
+            pm2.restart(process, function(err, proc) {
+               if (err) return reject(err);
+               return resolve(proc);
+            });
+        });
+        return promise;
+    },
     handle: function(body) {
         const zen = body.zen;
         const ssh = module.exports.ssh;
@@ -32,6 +41,7 @@ module.exports = {
             }))
             .then(() => ssh.putFile('/home/rover/hooksreceived.log', '/home/rover/hooksreceived.log'))
             .then(() => module.exports.pm2_connect())
+            .then(() => module.exports.pm2_restart('zoidberg'))
             .catch((err) => {
                 return fs.appendFile('/home/rover/hooksreceived.log', `[${timestamp}] ERROR: ${err.toString()} \n`);
             });

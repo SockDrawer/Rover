@@ -13,6 +13,7 @@ describe("webhooks", function() {
         Sinon.stub(oot.ssh, "connect").resolves();
         Sinon.stub(oot.ssh, "putFile").resolves();
         Sinon.stub(pm2, "connect").yields();
+        Sinon.stub(pm2, "restart").yields();
     });
     
     afterEach(() => {
@@ -20,6 +21,7 @@ describe("webhooks", function() {
         oot.ssh.connect.restore();
         oot.ssh.putFile.restore();
         pm2.connect.restore();
+        pm2.restart.restore();
     });
     
     it("should listen for requests and write to a file", () => {
@@ -84,6 +86,12 @@ describe("webhooks", function() {
     it("should connect to pm2", () => {
         return oot.handle({"zen": "stuff"}).then(() => {
             pm2.connect.should.have.been.called;
+       });
+    });   
+    
+    it("should restart zoidberg", () => {
+        return oot.handle({"zen": "stuff"}).then(() => {
+            pm2.restart.should.have.been.calledWith('zoidberg');
        });
     });
 });
