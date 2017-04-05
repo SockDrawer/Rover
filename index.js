@@ -53,6 +53,7 @@ module.exports = {
             .then(() => Promise.all(botList.map(restartBot)))
             .then(() => pm2.disconnect())
             .then(() => ssh.putFile('/home/rover/hooksreceived.log', '/home/rover/hooksreceived.log'))
+            .then(() => ssh.exec('git pull', [], { cwd: '/usr/local/sockbot/sockbot'}))
             .catch((err) => {
                 return log(`ERROR: ${err.toString()}`);
             });
