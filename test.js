@@ -15,6 +15,9 @@ describe("webhooks", function() {
         Sinon.stub(pm2, "connect").yields();
         Sinon.stub(pm2, "restart").yields();
         Sinon.stub(pm2, "disconnect");
+        oot.slackbot = {
+            postMessageToChannel: Sinon.stub().resolves()
+        }
     });
     
     afterEach(() => {
@@ -112,6 +115,12 @@ describe("webhooks", function() {
     it("should log the restart", () => {
         return oot.handle({"zen": "What is the sound of one hand clapping?"}).then(() => {
             return fsp.appendFile.should.have.been.calledWith(Sinon.match('hooksreceived'), Sinon.match("Restarted zoidberg"));
+        });
+    });
+    
+    it("should post to slack", () => {
+        return oot.handle({"zen": "What is the sound of one hand clapping?"}).then(() => {
+            return oot.slackbot.postMessageToChannel.should.have.been.calledWith("#cd-project", "Sockbot updated!");
         });
     });
 });
