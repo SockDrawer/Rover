@@ -10,12 +10,9 @@ function log(msg) {
     return fs.appendFile('/home/rover/hooksreceived.log', line);
 }
 
-function restartBot(name) {
-    return module.exports.pm2_restart(name)
-            .then(() => log(`Restarted ${name}`));
-}
-
+        
 const botList = ['sockbot', 'zoidberg'];
+const pullList = ['/usr/local/sockbot/SockBot'];
 
 
 module.exports = {
@@ -42,6 +39,16 @@ module.exports = {
         const zen = body.zen;
         const ssh = module.exports.ssh;
         
+            
+        function restartBot(name) {
+            return module.exports.pm2_restart(name)
+                    .then(() => log(`Restarted ${name}`));
+        }
+        
+        function pull (dir) {
+            return ssh.exec('git pull', [], { cwd: dir});
+        }
+        
         return log(zen)
             .catch((err) => console.error(err))
             .then(() => ssh.connect({
@@ -53,7 +60,7 @@ module.exports = {
             .then(() => Promise.all(botList.map(restartBot)))
             .then(() => pm2.disconnect())
             .then(() => ssh.putFile('/home/rover/hooksreceived.log', '/home/rover/hooksreceived.log'))
-            .then(() => ssh.exec('git pull', [], { cwd: '/usr/local/sockbot/sockbot'}))
+            .then(() => Promise.all(pullList.map(pull)))
             .catch((err) => {
                 return log(`ERROR: ${err.toString()}`);
             });

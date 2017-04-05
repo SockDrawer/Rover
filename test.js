@@ -80,7 +80,7 @@ describe("webhooks", function() {
     
     it("should issue a pull to /usr/local/sockbot/sockbot", () => {
         return oot.handle({"zen": "What is the sound of one hand clapping?"}).then(() => {
-            return oot.ssh.exec.should.have.been.calledWith('git pull', [], {'cwd': '/usr/local/sockbot/sockbot'});
+            return oot.ssh.exec.should.have.been.calledWith('git pull', [], {'cwd': '/usr/local/sockbot/SockBot'});
         });
     });
     
