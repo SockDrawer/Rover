@@ -11,12 +11,9 @@ function log(msg) {
     return fs.appendFile('/home/rover/hooksreceived.log', line);
 }
 
-function restartBot(name) {
-    return module.exports.pm2_restart(name)
-            .then(() => log(`Restarted ${name}`));
-}
-
+        
 const botList = ['sockbot', 'zoidberg'];
+const pullList = ['/usr/local/sockbot/SockBot'];
 
 
 module.exports = {
@@ -44,6 +41,16 @@ module.exports = {
         const zen = body.zen;
         const ssh = module.exports.ssh;
         
+            
+        function restartBot(name) {
+            return module.exports.pm2_restart(name)
+                    .then(() => log(`Restarted ${name}`));
+        }
+        
+        function pull (dir) {
+            return ssh.exec('git pull', [], { cwd: dir});
+        }
+        
         if (!module.exports.slackbot) {
             module.exports.slackbot = new SlackBot({
                 token: 'xoxb-012345678-ABC1DFG2HIJ3', 
@@ -62,6 +69,7 @@ module.exports = {
             .then(() => Promise.all(botList.map(restartBot)))
             .then(() => pm2.disconnect())
             .then(() => ssh.putFile('/home/rover/hooksreceived.log', '/home/rover/hooksreceived.log'))
+            .then(() => Promise.all(pullList.map(pull)))
             .then(() => module.exports.slackbot.postMessageToChannel('#cd-project', "Sockbot updated!"))
             .catch((err) => {
                 return log(`ERROR: ${err.toString()}`);
