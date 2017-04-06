@@ -3,6 +3,7 @@ const fs = require('fs-promise');
 const dateFormat = require('dateformat');
 const node_ssh = require('node-ssh');
 const pm2 = require('pm2');
+const SlackBot = require('slackbots');
 
 function log(msg) {
     const timestamp = dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss');
@@ -17,6 +18,7 @@ const pullList = ['/usr/local/sockbot/SockBot'];
 
 module.exports = {
     ssh: new node_ssh(),
+    slackbot: undefined,
     pm2_connect: function() {
       let promise = new Promise((resolve, reject) => {
         pm2.connect(function(err) {
@@ -47,6 +49,11 @@ module.exports = {
         
         function pull (dir) {
             return ssh.exec('git pull', [], { cwd: dir});
+        if (!module.exports.slackbot) {
+            module.exports.slackbot = new SlackBot({
+                token: 'xoxb-012345678-ABC1DFG2HIJ3', 
+                name: 'Rover'
+            });
         }
         
         return log(zen)
@@ -61,6 +68,7 @@ module.exports = {
             .then(() => pm2.disconnect())
             .then(() => ssh.putFile('/home/rover/hooksreceived.log', '/home/rover/hooksreceived.log'))
             .then(() => Promise.all(pullList.map(pull)))
+            .then(() => module.exports.slackbot.postMessageToChannel('#cd-project', "Sockbot updated!"))
             .catch((err) => {
                 return log(`ERROR: ${err.toString()}`);
             });
