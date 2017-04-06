@@ -4,6 +4,7 @@ const dateFormat = require('dateformat');
 const node_ssh = require('node-ssh');
 const pm2 = require('pm2');
 const SlackBot = require('slackbots');
+const slackToken = process.env.SLACK_TOKEN || 'invalid';
 
 function log(msg) {
     const timestamp = dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss');
@@ -53,7 +54,7 @@ module.exports = {
         
         if (!module.exports.slackbot) {
             module.exports.slackbot = new SlackBot({
-                token: 'xoxb-012345678-ABC1DFG2HIJ3', 
+                token: slackToken, 
                 name: 'Rover'
             });
         }
