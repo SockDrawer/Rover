@@ -49,6 +49,8 @@ module.exports = {
         
         function pull (dir) {
             return ssh.exec('git pull', [], { cwd: dir});
+        }
+        
         if (!module.exports.slackbot) {
             module.exports.slackbot = new SlackBot({
                 token: 'xoxb-012345678-ABC1DFG2HIJ3', 
