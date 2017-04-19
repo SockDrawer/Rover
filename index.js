@@ -4,7 +4,18 @@ const dateFormat = require('dateformat');
 const node_ssh = require('node-ssh');
 const pm2 = require('pm2');
 const SlackBot = require('slackbots');
+
+
+//Stuff that will eventually be in a config file
+const host = 'sockrpgtest.sockdrawer.io';
+const botList = ['sockbot', 'zoidberg'];
+const pullList = ['/usr/local/sockbot/SockBot'];
 const slackToken = process.env.SLACK_TOKEN || 'invalid';
+const slackbotName = 'Rover';
+const slackChannel = '#cd-project';
+const logfile = '/home/rover/hooksreceived.log';
+const logfileRemote = logfile;
+const keyfile = '/home/rover/.ssh/id_rsa';
 
 /**
  * Log a message
@@ -15,13 +26,8 @@ const slackToken = process.env.SLACK_TOKEN || 'invalid';
 function log(msg) {
     const timestamp = dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss');
     const line = `[${timestamp}] ${msg} \n`;
-    return fs.appendFile('/home/rover/hooksreceived.log', line);
+    return fs.appendFile(logfile, line);
 }
-
-        
-const botList = ['sockbot', 'zoidberg'];
-const pullList = ['/usr/local/sockbot/SockBot'];
-
 
 module.exports = {
     ssh: new node_ssh(),
@@ -90,23 +96,23 @@ module.exports = {
         if (!module.exports.slackbot) {
             module.exports.slackbot = new SlackBot({
                 token: slackToken, 
-                name: 'Rover'
+                name: slackbotName
             });
         }
         
         return log(zen)
             .catch((err) => console.error(err))
             .then(() => ssh.connect({
-                host: 'sockrpgtest.sockdrawer.io',
+                host: host,
                 username: 'rover',
-                privateKey: '/home/rover/.ssh/id_rsa'
+                privateKey: keyfile
             }))
             .then(() => module.exports.pm2_connect())
             .then(() => Promise.all(botList.map(restartBot)))
             .then(() => pm2.disconnect())
-            .then(() => ssh.putFile('/home/rover/hooksreceived.log', '/home/rover/hooksreceived.log'))
+            .then(() => ssh.putFile(logfile, logfileRemote))
             .then(() => Promise.all(pullList.map(pull)))
-            .then(() => module.exports.slackbot.postMessageToChannel('#cd-project', "Sockbot updated!"))
+            .then(() => module.exports.slackbot.postMessageToChannel(slackChannel, "Sockbot updated!"))
             .catch((err) => {
                 return log(`ERROR: ${err.toString()}`);
             });
