@@ -7,10 +7,10 @@ const SlackBot = require('slackbots');
 const slackToken = process.env.SLACK_TOKEN || 'invalid';
 
 /**
- * Description
+ * Log a message
  * @method log
- * @param {} msg
- * @return CallExpression
+ * @param {} msg The message to log
+ * @return Promise that resolves when the log is done
  */
 function log(msg) {
     const timestamp = dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss');
@@ -27,9 +27,9 @@ module.exports = {
     ssh: new node_ssh(),
     slackbot: undefined,
     /**
-     * Description
+     * Connect to PM2
      * @method pm2_connect
-     * @return promise
+     * @return promise that resolves to a connected PM2 instance
      */
     pm2_connect: function() {
       let promise = new Promise((resolve, reject) => {
@@ -41,10 +41,10 @@ module.exports = {
       return promise;
     },
     /**
-     * Description
+     * Restart pm2
      * @method pm2_restart
-     * @param {} process
-     * @return promise
+     * @param {} process the process to restart
+     * @return promise that resolves to the restarted process
      */
     pm2_restart: function(process) {
         let promise = new Promise((resolve, reject) => {
@@ -56,10 +56,10 @@ module.exports = {
         return promise;
     },
     /**
-     * Description
+     * Handle an incoming call
      * @method handle
-     * @param {} body
-     * @return CallExpression
+     * @param {} body The body of the request
+     * @return Promise resolves when the handler is ready for another request
      */
     handle: function(body) {
         const zen = body.zen;
@@ -67,10 +67,10 @@ module.exports = {
         
             
         /**
-         * Description
+         * Restart a single bot
          * @method restartBot
-         * @param {} name
-         * @return CallExpression
+         * @param {} name The name of the bot to restart
+         * @return Promise a promise that resolves when the bot is restarted
          */
         function restartBot(name) {
             return module.exports.pm2_restart(name)
@@ -78,10 +78,10 @@ module.exports = {
         }
         
         /**
-         * Description
+         * Execute a git pull on a directory
          * @method pull
-         * @param {} dir
-         * @return CallExpression
+         * @param {} dir The diretory to pull
+         * @return Promise A promise that resolves when the pull is done
          */
         function pull (dir) {
             return ssh.exec('git pull', [], { cwd: dir});
