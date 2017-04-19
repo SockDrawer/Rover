@@ -6,6 +6,12 @@ const pm2 = require('pm2');
 const SlackBot = require('slackbots');
 const slackToken = process.env.SLACK_TOKEN || 'invalid';
 
+/**
+ * Description
+ * @method log
+ * @param {} msg
+ * @return CallExpression
+ */
 function log(msg) {
     const timestamp = dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss');
     const line = `[${timestamp}] ${msg} \n`;
@@ -20,6 +26,11 @@ const pullList = ['/usr/local/sockbot/SockBot'];
 module.exports = {
     ssh: new node_ssh(),
     slackbot: undefined,
+    /**
+     * Description
+     * @method pm2_connect
+     * @return promise
+     */
     pm2_connect: function() {
       let promise = new Promise((resolve, reject) => {
         pm2.connect(function(err) {
@@ -29,6 +40,12 @@ module.exports = {
       });
       return promise;
     },
+    /**
+     * Description
+     * @method pm2_restart
+     * @param {} process
+     * @return promise
+     */
     pm2_restart: function(process) {
         let promise = new Promise((resolve, reject) => {
             pm2.restart(process, function(err, proc) {
@@ -38,16 +55,34 @@ module.exports = {
         });
         return promise;
     },
+    /**
+     * Description
+     * @method handle
+     * @param {} body
+     * @return CallExpression
+     */
     handle: function(body) {
         const zen = body.zen;
         const ssh = module.exports.ssh;
         
             
+        /**
+         * Description
+         * @method restartBot
+         * @param {} name
+         * @return CallExpression
+         */
         function restartBot(name) {
             return module.exports.pm2_restart(name)
                     .then(() => log(`Restarted ${name}`));
         }
         
+        /**
+         * Description
+         * @method pull
+         * @param {} dir
+         * @return CallExpression
+         */
         function pull (dir) {
             return ssh.exec('git pull', [], { cwd: dir});
         }
@@ -86,9 +121,9 @@ app.use(bodyParser.json());
 app.post('/updated', function (req, res, next) {
     return module.exports.handle(req.body)
     .then(() => res.sendStatus(200))
-    .catch(next)
+    .catch(next);
 });
 
 app.listen(3000, function () {
-  console.log('Listening on port 3000!')
+  console.log('Listening on port 3000!');
 });
